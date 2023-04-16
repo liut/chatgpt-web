@@ -28,7 +28,7 @@ function http<T = any>(
     if (res.data.status === 'Success' || typeof res.data === 'string')
       return res.data
 
-    if (res.data.status === 'Unauthorized') {
+    if (res.status === 401 || res.data.status === 'Unauthorized') {
       authStore.removeToken()
       window.location.reload()
     }

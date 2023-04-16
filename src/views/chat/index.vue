@@ -13,7 +13,8 @@ import HeaderComponent from './components/Header/index.vue'
 import { HoverButton, SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useChatStore, usePromptStore } from '@/store'
-import { fetchChatAPIProcess } from '@/api'
+import type { StreamMessage } from '@/api'
+import { fetchChatStream } from '@/api'
 import { t } from '@/locales'
 
 let controller = new AbortController()
@@ -106,45 +107,45 @@ async function onConversation() {
   try {
     let lastText = ''
     const fetchChatAPIOnce = async () => {
-      await fetchChatAPIProcess<Chat.ConversationResponse>({
+      await fetchChatStream({
         prompt: message,
         options,
         signal: controller.signal,
-        onDownloadProgress: ({ event }) => {
-          const xhr = event.target
-          const { responseText } = xhr
-          // Always process the final line
-          const lastIndex = responseText.lastIndexOf('\n', responseText.length - 2)
-          let chunk = responseText
-          if (lastIndex !== -1)
-            chunk = responseText.substring(lastIndex)
+        onMessage: (data: StreamMessage) => {
+          if (data.delta)
+            lastText += data.delta
+          else if (data.text)
+            lastText = data.text ?? ''
           try {
-            const data = JSON.parse(chunk)
             updateChat(
               +uuid,
               dataSources.value.length - 1,
               {
                 dateTime: new Date().toLocaleString(),
-                text: lastText + (data.text ?? ''),
+                text: lastText,
                 inversion: false,
                 error: false,
                 loading: true,
-                conversationOptions: { conversationId: data.conversationId, parentMessageId: data.id },
+                conversationOptions: { conversationId: data.csid, parentMessageId: data.id || '' },
                 requestOptions: { prompt: message, options: { ...options } },
               },
             )
 
-            if (openLongReply && data.detail.choices[0].finish_reason === 'length') {
+            if (openLongReply && data.finishReason === 'length') {
               options.parentMessageId = data.id
-              lastText = data.text
+              if (data.text)
+                lastText = data.text
               message = ''
               return fetchChatAPIOnce()
+            }
+            else if (data.finishReason) {
+              updateChatSome(+uuid, dataSources.value.length - 1, { loading: false })
             }
 
             scrollToBottomIfAtBottom()
           }
           catch (error) {
-            //
+          //
           }
         },
       })
@@ -237,39 +238,40 @@ async function onRegenerate(index: number) {
   try {
     let lastText = ''
     const fetchChatAPIOnce = async () => {
-      await fetchChatAPIProcess<Chat.ConversationResponse>({
+      await fetchChatStream({
         prompt: message,
         options,
         signal: controller.signal,
-        onDownloadProgress: ({ event }) => {
-          const xhr = event.target
-          const { responseText } = xhr
-          // Always process the final line
-          const lastIndex = responseText.lastIndexOf('\n', responseText.length - 2)
-          let chunk = responseText
-          if (lastIndex !== -1)
-            chunk = responseText.substring(lastIndex)
+        onMessage: (data: StreamMessage) => {
+          if (data.delta)
+            lastText += data.delta
+          else if (data.text)
+            lastText = data.text ?? ''
+
           try {
-            const data = JSON.parse(chunk)
             updateChat(
               +uuid,
               index,
               {
                 dateTime: new Date().toLocaleString(),
-                text: lastText + (data.text ?? ''),
+                text: lastText,
                 inversion: false,
                 error: false,
                 loading: true,
-                conversationOptions: { conversationId: data.conversationId, parentMessageId: data.id },
+                conversationOptions: { conversationId: data.csid, parentMessageId: data.id },
                 requestOptions: { prompt: message, options: { ...options } },
               },
             )
 
-            if (openLongReply && data.detail.choices[0].finish_reason === 'length') {
+            if (openLongReply && data.finishReason === 'length') {
               options.parentMessageId = data.id
-              lastText = data.text
+              if (data.text)
+                lastText = data.text
               message = ''
               return fetchChatAPIOnce()
+            }
+            else if (data.finishReason) {
+              updateChatSome(+uuid, dataSources.value.length - 1, { loading: false })
             }
           }
           catch (error) {
@@ -515,12 +517,12 @@ onUnmounted(() => {
               <SvgIcon icon="ri:delete-bin-line" />
             </span>
           </HoverButton>
-          <HoverButton v-if="!isMobile" @click="handleExport">
+          <HoverButton v-if="!isMobile && false" @click="handleExport">
             <span class="text-xl text-[#4f555e] dark:text-white">
               <SvgIcon icon="ri:download-2-line" />
             </span>
           </HoverButton>
-          <HoverButton @click="toggleUsingContext">
+          <HoverButton v-if="false" @click="toggleUsingContext">
             <span class="text-xl" :class="{ 'text-[#4b9e5f]': usingContext, 'text-[#a8071a]': !usingContext }">
               <SvgIcon icon="ri:chat-history-line" />
             </span>

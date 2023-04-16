@@ -1,6 +1,7 @@
 import type { FetchFn } from 'chatgpt'
 
 export interface RequestProps {
+  csid?: string
   prompt: string
   options?: ChatContext
   systemMessage: string
@@ -32,3 +33,10 @@ export interface ModelConfig {
 }
 
 export type ApiModel = 'ChatGPTAPI' | 'ChatGPTUnofficialProxyAPI' | undefined
+
+export interface User {
+  uid?: string
+  name?: string
+  avatar?: string
+  hit?: number
+}
