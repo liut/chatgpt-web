@@ -1,11 +1,14 @@
 import { defineStore } from 'pinia'
 import { getToken, removeToken, setToken } from './helper'
 import { store } from '@/store/helper'
+import type { UserInfo } from '@/store/modules/user/helper'
 import { fetchSession } from '@/api'
 
 interface SessionResponse {
   auth: boolean
   model: 'ChatGPTAPI' | 'ChatGPTUnofficialProxyAPI'
+  user?: UserInfo
+  uri?: string // login URI
 }
 
 export interface AuthState {
