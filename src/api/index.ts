@@ -3,7 +3,13 @@ import { SSE } from 'sse.js'
 import { get, post } from '@/utils/request'
 import { useAuthStore, useSettingStore } from '@/store'
 
-export function fetchChatAPI<T = any>(
+export function authLogout() {
+  return get({
+    url: '/auth/logout',
+  })
+}
+
+export function fetchChatAPI<T = unknown>(
   prompt: string,
   options?: { conversationId?: string; parentMessageId?: string },
   signal?: GenericAbortSignal,
@@ -15,21 +21,38 @@ export function fetchChatAPI<T = any>(
   })
 }
 
-export function fetchChatConfig<T = any>() {
+export function fetchChatConfig<T = unknown>() {
   return post<T>({
     url: '/config',
   })
 }
 
+export interface Function {
+  arguments?: string
+  name?: string
+}
+
+export interface ToolCall {
+  index: number
+  id?: string
+  function?: Function
+  type?: 'function'
+}
 export interface StreamMessage {
   id: string
   csid?: string
   pmid?: string
   delta: string
   text?: string
+  tool_calls?: Array<ToolCall>
   finishReason?: string
 }
 
+/**
+ * 建立与服务器的SSE连接，获取聊天流式响应
+ * @param params 请求参数和回调函数
+ * @returns 返回一个包含close方法的对象，用于手动关闭连接
+ */
 export function fetchChatStream(
   params: {
     prompt: string
@@ -39,62 +62,127 @@ export function fetchChatStream(
     onError?: (event: Event) => void
     onMessage: (msg: StreamMessage) => void
     signal?: GenericAbortSignal
+    retries?: number // 重试次数，默认为0
   },
 ) {
+  // 初始化参数
+  const {
+    prompt,
+    onMessage,
+    onError,
+    onAbort,
+    signal,
+    retries = 0,
+  } = params
+
   let csid = params.csid || params.options?.conversationId || ''
+  let currentRetry = 0
+  let eventSource: InstanceType<typeof SSE> | null = null
+
+  // 准备请求头
   const headers: { [key: string]: string } = { 'Content-Type': 'application/json' }
   const settingStore = useSettingStore()
   const token = useAuthStore().token
   if (token)
     headers.Authorization = `Bearer ${token}`
 
-  const eventSource = new SSE('/api/chat-sse', {
-    headers,
-    payload: JSON.stringify({
-      csid,
-      prompt: params.prompt,
-      options: params.options,
-      systemMessage: settingStore.systemMessage,
-    }),
-  })
+  // 创建并配置SSE连接
+  const createEventSource = () => {
+    eventSource = new SSE('/api/chat-sse', {
+      headers,
+      payload: JSON.stringify({
+        csid,
+        prompt,
+        options: params.options,
+        systemMessage: settingStore.systemMessage,
+      }),
+    })
 
-  const { onMessage, onError, onAbort, signal } = params
+    // 处理消息接收
+    const receiveMessage = (e: MessageEvent) => {
+      // 如果没有会话ID且响应头中包含会话ID，则更新会话ID
+      if (!csid && eventSource?.xhr)
+        csid = eventSource.xhr.getResponseHeader('Conversation-ID')
 
-  const receiveMessage = (e: MessageEvent) => {
-    if (!csid && eventSource.xhr)
-      csid = eventSource.xhr.getResponseHeader('Conversation-ID')
+      // 忽略空消息和结束标记
+      if (e.data.length === 0 || e.data === '[DONE]')
+        return
 
-    if (e.data.length === 0)
-      return
+      // 解析响应数据
+      const cr = JSON.parse(e.data) // sse data as chatResponse
 
-    if (e.data === '[DONE]')
-      return
+      // 兼容旧版响应格式
+      if (cr.choices && cr.choices.length > 0)
+        cr.delta = cr.choices[0].delta.content
 
-    const cr = JSON.parse(e.data)
-    if (cr.choices && cr.choices.length > 0) // for old response
-      cr.delta = cr.choices[0].delta.content
+      // 确保响应中包含会话ID
+      if (csid && !cr.csid)
+        cr.csid = csid
 
-    if (csid && !cr.csid)
-      cr.csid = csid
+      // 调用消息回调
+      onMessage(cr)
+    }
 
-    onMessage(cr)
+    // 处理错误
+    const handleError = (event: Event) => {
+      // 检查状态码，如果是401（未授权），则刷新页面
+      if (eventSource?.xhr?.status === 401) {
+        console.warn('Authentication failed (401), refreshing page...')
+        window.location.reload()
+        return
+      }
+
+      // 尝试重试连接
+      if (currentRetry < retries) {
+        currentRetry++
+        console.warn(`SSE connection error, retrying (${currentRetry}/${retries})...`)
+
+        // 清理旧连接
+        if (eventSource) {
+          eventSource.close()
+          eventSource = null
+        }
+
+        // 延迟重试
+        setTimeout(createEventSource, 1000 * currentRetry)
+        return
+      }
+
+      // 如果提供了错误回调，则调用它
+      if (onError)
+        onError(event)
+    }
+
+    // 添加事件监听器
+    eventSource.addEventListener('message', receiveMessage)
+    eventSource.addEventListener('error', handleError)
+
+    // 处理中止事件
+    if (onAbort)
+      eventSource.addEventListener('abort', onAbort)
+    else if (signal)
+      eventSource.addEventListener('abort', signal.onabort)
+
+    // 启动流
+    eventSource.stream()
   }
 
-  eventSource.addEventListener('message', receiveMessage)
+  // 初始化连接
+  createEventSource()
 
-  if (onError)
-    eventSource.addEventListener('error', onError)
-
-  if (onAbort)
-    eventSource.addEventListener('abort', onAbort)
-  else if (signal)
-    eventSource.addEventListener('abort', signal.onabort)
-
-  eventSource.stream()
+  // 返回一个包含close方法的对象，用于手动关闭连接
+  return {
+    close: () => {
+      if (eventSource) {
+        eventSource.close()
+        eventSource = null
+      }
+    },
+  }
 }
 
 // Deprecated: by fetchChatStream
-export function fetchChatAPIProcess<T = any>(
+export function fetchChatAPIProcess<T = unknown>(
   params: {
     prompt: string
     options?: { conversationId?: string; parentMessageId?: string }
@@ -105,7 +193,7 @@ export function fetchChatAPIProcess<T = any>(
   const settingStore = useSettingStore()
   const authStore = useAuthStore()
 
-  let data: Record<string, any> = {
+  let data: Record<string, unknown> = {
     prompt: params.prompt,
     options: params.options,
   }

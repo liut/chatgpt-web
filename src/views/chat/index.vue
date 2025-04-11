@@ -145,7 +145,7 @@ async function onConversation() {
             scrollToBottomIfAtBottom()
           }
           catch (error) {
-          //
+            console.warn(error)
           }
         },
       })
@@ -275,7 +275,7 @@ async function onRegenerate(index: number) {
             }
           }
           catch (error) {
-            //
+            console.warn(error)
           }
         },
       })
