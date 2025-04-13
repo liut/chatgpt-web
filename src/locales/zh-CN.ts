@@ -27,6 +27,7 @@ export default {
     verify: '验证',
     unauthorizedTips: '未经授权，请先进行验证。',
     stopResponding: '停止响应',
+    done: '完成',
   },
   chat: {
     newChatButton: '新建聊天',
@@ -53,6 +54,7 @@ export default {
     preview: '预览',
     showRawText: '显示原文',
     thinking: '思考中...',
+    toolCalling: '工具调用中...',
   },
   setting: {
     setting: '设置',

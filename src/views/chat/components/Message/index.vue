@@ -15,6 +15,7 @@ interface Props {
   inversion?: boolean
   error?: boolean
   loading?: boolean
+  toolCalling?: boolean
 }
 
 interface Emit {
@@ -118,6 +119,7 @@ async function handleCopy() {
           :error="error"
           :text="text"
           :loading="loading"
+          :tool-calling="toolCalling"
           :as-raw-text="asRawText"
         />
         <div class="flex flex-col">

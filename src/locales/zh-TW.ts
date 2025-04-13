@@ -27,6 +27,7 @@ export default {
     verify: '驗證',
     unauthorizedTips: '未經授權，請先進行驗證。',
     stopResponding: '停止回應',
+    done: '完成',
   },
   chat: {
     newChatButton: '新增對話',
@@ -53,6 +54,7 @@ export default {
     preview: '預覽',
     showRawText: '顯示原文',
     thinking: '思考中...',
+    toolCalling: '工具調用中...',
   },
   setting: {
     setting: '設定',

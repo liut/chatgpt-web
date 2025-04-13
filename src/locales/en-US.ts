@@ -27,6 +27,7 @@ export default {
     verify: 'Verify',
     unauthorizedTips: 'Unauthorized, please verify first.',
     stopResponding: 'Stop Responding',
+    done: 'Done',
   },
   chat: {
     newChatButton: 'New Chat',
@@ -53,6 +54,7 @@ export default {
     preview: 'Preview',
     showRawText: 'Show as raw text',
     thinking: 'Thinking...',
+    toolCalling: 'Tool Calling...',
   },
   setting: {
     setting: 'Setting',

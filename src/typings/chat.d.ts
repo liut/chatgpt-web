@@ -1,5 +1,9 @@
 declare namespace Chat {
 
+	interface Tool {
+		name: string
+	}
+
 	interface Chat {
 		dateTime: string
 		text: string
@@ -8,6 +12,10 @@ declare namespace Chat {
 		loading?: boolean
 		conversationOptions?: ConversationRequest | null
 		requestOptions: { prompt: string; options?: ConversationRequest | null }
+		toolCalling?: boolean
+		toolCalls?: Tool[]
+		toolCallId?: string
+		toolCallResult?: string
 	}
 
 	interface History {

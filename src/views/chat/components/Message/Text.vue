@@ -15,6 +15,7 @@ interface Props {
   text?: string
   loading?: boolean
   asRawText?: boolean
+  toolCalling?: boolean
 }
 
 const props = defineProps<Props>()
@@ -139,6 +140,11 @@ onUnmounted(() => {
   <div class="text-black" :class="wrapClass">
     <div ref="textRef" class="leading-relaxed break-words">
       <div v-if="!inversion">
+        <div v-if="toolCalling" class="text-xs markdown-body">
+          <blockquote style="padding: .4em;">
+            <i>{{ $t('chat.toolCalling') }} <span v-if="!loading">... {{ $t('common.done') }}</span></i>
+          </blockquote>
+        </div>
         <div v-if="!asRawText" class="markdown-body" :class="{ 'markdown-body-generate': loading }" v-html="text" />
         <div v-else class="whitespace-pre-wrap" v-text="text" />
       </div>

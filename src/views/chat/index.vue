@@ -106,6 +106,7 @@ async function onConversation() {
 
   try {
     let lastText = ''
+    let toolCalling = false
     const fetchChatAPIOnce = async () => {
       await fetchChatStream({
         prompt: message,
@@ -116,6 +117,9 @@ async function onConversation() {
             lastText += data.delta
           else if (data.text)
             lastText = data.text ?? ''
+          else if (data.tool_calls && data.tool_calls.length > 0)
+            toolCalling = true
+            // lastText = `>  *${t('chat.toolCalling')}*\n\n`
           try {
             updateChat(
               +uuid,
@@ -126,6 +130,7 @@ async function onConversation() {
                 inversion: false,
                 error: false,
                 loading: true,
+                toolCalling,
                 conversationOptions: { conversationId: data.csid, parentMessageId: data.id || '' },
                 requestOptions: { prompt: message, options: { ...options } },
               },
@@ -237,6 +242,7 @@ async function onRegenerate(index: number) {
 
   try {
     let lastText = ''
+    let toolCalling = false
     const fetchChatAPIOnce = async () => {
       await fetchChatStream({
         prompt: message,
@@ -247,6 +253,9 @@ async function onRegenerate(index: number) {
             lastText += data.delta
           else if (data.text)
             lastText = data.text ?? ''
+          else if (data.tool_calls && data.tool_calls.length > 0)
+            toolCalling = true
+            // lastText = `>  *${t('chat.toolCalling')}*\n\n`
 
           try {
             updateChat(
@@ -258,6 +267,7 @@ async function onRegenerate(index: number) {
                 inversion: false,
                 error: false,
                 loading: true,
+                toolCalling,
                 conversationOptions: { conversationId: data.csid, parentMessageId: data.id },
                 requestOptions: { prompt: message, options: { ...options } },
               },
@@ -492,6 +502,7 @@ onUnmounted(() => {
                   :inversion="item.inversion"
                   :error="item.error"
                   :loading="item.loading"
+                  :tool-calling="item.toolCalling"
                   @regenerate="onRegenerate(index)"
                   @delete="handleDelete(index)"
                 />
