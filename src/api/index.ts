@@ -95,6 +95,8 @@ export function fetchChatStream(
         prompt,
         options: params.options,
         systemMessage: settingStore.systemMessage,
+        temperature: settingStore.temperature,
+        top_p: settingStore.top_p,
       }),
     })
 
@@ -102,7 +104,7 @@ export function fetchChatStream(
     const receiveMessage = (e: MessageEvent) => {
       // 如果没有会话ID且响应头中包含会话ID，则更新会话ID
       if (!csid && eventSource?.xhr)
-        csid = eventSource.xhr.getResponseHeader('Conversation-ID')
+        csid = eventSource.xhr.getResponseHeader('Conversation-Id')
 
       // 忽略空消息和结束标记
       if (e.data.length === 0 || e.data === '[DONE]')
