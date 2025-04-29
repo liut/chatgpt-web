@@ -1,0 +1,69 @@
+image: fhyx/nodejs:v20
+
+stages:
+  - lint
+  - build
+
+cache:
+  key: capcon_assistant_v20
+  paths:
+    - node_modules/
+
+variables:
+  DEVELOP_HOST: moon.hyyl.xyz
+  DEPLOY_HOST: earth.hyyl.xyz
+  DEPLOY_USER: sa
+  NAME: assistant
+  INLINE_RUNTIME_CHUNK: 'false'
+  GENERATE_SOURCEMAP: 'false'
+  SKIP_PREFLIGHT_CHECK: 'true'
+  VITE_APP_BASE: /apps/assistant
+  VITE_TOKEN_NAME: oceans-token
+
+before_script:
+  - export DATE=$(date '+%Y%m%d')
+  # deploy key
+  - mkdir -p ~/.ssh
+  - test -f /secret/sa_id_ecdsa && cp /secret/sa_id_ecdsa ~/.ssh/id_ecdsa || (echo "$SSH_PRIVATE_KEY") > ~/.ssh/id_ecdsa
+  - chmod 0600 ~/.ssh/id_ecdsa
+  # - ls -al ~/.ssh/
+  - eval $(ssh-agent -s)
+  - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+  - echo -e "Host ${DEPLOY_HOST:-static-pub}\n\tPort ${DEPLOY_PORT:-22}\n\tUser ${DEPLOY_USER:-sa}\n\n" >> ~/.ssh/config
+  - test -z "${DEVELOP_HOST}" || echo -e "Host ${DEVELOP_HOST}\n\tPort ${DEVELOP_PORT:-22}\n\tUser ${DEPLOY_USER:-sa}\n\n" >> ~/.ssh/config
+  - which git && git config --global url."https://github.com/".insteadOf "git@github.com:"
+  - export DATE=$(date '+%Y%m%d')
+  - export TAG="${DATE}-${CI_COMMIT_SHORT_SHA}-${CI_JOB_ID}"
+  - export DEV_BRANCH="${CI_COMMIT_BRANCH//\//-}"
+  - export AUTHOR="${CI_COMMIT_AUTHOR}"
+  - which bun && bun install
+
+
+deploy-to-self-branch:
+  stage: build
+  variables:
+    GENERATE_SOURCEMAP: true
+  script:
+    - CI=false npm run build
+    - ssh ${DEPLOY_USER:-sa}@${DEVELOP_HOST:-moon} "test -d /var/www/apps/${NAME}-${DEV_BRANCH} || mkdir -p /var/www/apps/${NAME}-${DEV_BRANCH}"
+    - rsync -vrlptC --delete --exclude='.DS_*' build/* "${DEVELOP_HOST}:/var/www/apps/${NAME}-${DEV_BRANCH}"
+    - node scripts/notify_wx.js ${DEVELOP_HOST} app-${NAME}-${DEV_BRANCH}-testing
+
+  except:
+    - dev
+    - stage
+    - main
+  when: always
+
+deploy-to-testing:
+  stage: build
+  variables:
+    GENERATE_SOURCEMAP: true
+  script:
+    - CI=false npm run build
+    - ssh ${DEPLOY_USER:-sa}@${DEVELOP_HOST:-moon} "test -d /var/www/apps/${NAME}-${DEV_BRANCH} || mkdir /var/www/apps/${NAME}-${DEV_BRANCH}"
+    - rsync -vrlptC --delete --exclude='.DS_*' build/* "${DEVELOP_HOST}:/var/www/apps/${NAME}-${DEV_BRANCH}/"
+    - node scripts/notify_wx.js ${DEVELOP_HOST} ${NAME}-${DEV_BRANCH}-testing
+  only:
+    - dev@cupola/apps/assistant
+    - main@cupola/apps/assistant
