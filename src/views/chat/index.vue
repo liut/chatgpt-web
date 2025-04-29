@@ -247,6 +247,7 @@ async function onRegenerate(index: number) {
       await fetchChatStream({
         prompt: message,
         options,
+        regen: true,
         signal: controller.signal,
         onMessage: (data: StreamMessage) => {
           if (data.delta)
@@ -355,6 +356,7 @@ function handleExport() {
         Promise.resolve()
       }
       catch (error: any) {
+        console.warn(error)
         ms.error(t('chat.exportFailed'))
       }
       finally {

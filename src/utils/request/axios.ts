@@ -13,6 +13,7 @@ service.interceptors.request.use(
     return config
   },
   (error) => {
+    console.info('Request error:', error)
     return Promise.reject(error.response)
   },
 )
@@ -25,6 +26,7 @@ service.interceptors.response.use(
     throw new Error(response.status.toString())
   },
   (error) => {
+    console.info('Response error:', error)
     return Promise.reject(error)
   },
 )

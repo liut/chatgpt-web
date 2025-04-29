@@ -1,15 +1,16 @@
 import { ss } from '@/utils/storage'
 
-const LOCAL_NAME = 'SECRET_TOKEN'
+const SECRET_TOKEN = 'SECRET_TOKEN'
+const LOCAL_NAME = import.meta.env.VITE_TOKEN_NAME || SECRET_TOKEN
 
-export function getToken() {
+export function getToken() : string | undefined {
   return ss.get(LOCAL_NAME)
 }
 
 export function setToken(token: string) {
-  return ss.set(LOCAL_NAME, token)
+  return LOCAL_NAME === SECRET_TOKEN ? ss.set(LOCAL_NAME, token) : undefined
 }
 
 export function removeToken() {
-  return ss.remove(LOCAL_NAME)
+  return LOCAL_NAME === SECRET_TOKEN ? ss.remove(LOCAL_NAME) : undefined
 }

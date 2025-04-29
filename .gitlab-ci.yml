@@ -1,11 +1,11 @@
-image: fhyx/nodejs:v20
+image: fhyx/nodejs:v22
 
 stages:
   - lint
   - build
 
 cache:
-  key: capcon_assistant_v20
+  key: capcon_assistant_v22p
   paths:
     - node_modules/
 
@@ -17,7 +17,7 @@ variables:
   INLINE_RUNTIME_CHUNK: 'false'
   GENERATE_SOURCEMAP: 'false'
   SKIP_PREFLIGHT_CHECK: 'true'
-  VITE_APP_BASE: /apps/assistant
+  VITE_GLOB_API_URL: /api
   VITE_TOKEN_NAME: oceans-token
 
 before_script:
@@ -36,18 +36,23 @@ before_script:
   - export TAG="${DATE}-${CI_COMMIT_SHORT_SHA}-${CI_JOB_ID}"
   - export DEV_BRANCH="${CI_COMMIT_BRANCH//\//-}"
   - export AUTHOR="${CI_COMMIT_AUTHOR}"
-  - which bun && bun install
+  - which npm && npm config set registry https://registry.npmmirror.com
+  - which pnpm && pnpm config set store-dir /cache/_pnpm
+  - which pnpm && pnpm install --no-frozen-lockfile
+  # - which bun && bun install
 
 
 deploy-to-self-branch:
   stage: build
   variables:
     GENERATE_SOURCEMAP: true
+    VITE_GLOB_API_URL: /ma/api
   script:
-    - CI=false npm run build
+    - export VITE_APP_BASE=/apps/${NAME}-${DEV_BRANCH}
+    - pnpm run build
     - ssh ${DEPLOY_USER:-sa}@${DEVELOP_HOST:-moon} "test -d /var/www/apps/${NAME}-${DEV_BRANCH} || mkdir -p /var/www/apps/${NAME}-${DEV_BRANCH}"
-    - rsync -vrlptC --delete --exclude='.DS_*' build/* "${DEVELOP_HOST}:/var/www/apps/${NAME}-${DEV_BRANCH}"
-    - node scripts/notify_wx.js ${DEVELOP_HOST} app-${NAME}-${DEV_BRANCH}-testing
+    - rsync -vrlptC --delete --exclude='.DS_*' dist/* "${DEVELOP_HOST}:/var/www/apps/${NAME}-${DEV_BRANCH}"
+    # - node scripts/notify_wx.js ${DEVELOP_HOST} app-${NAME}-${DEV_BRANCH}-testing
 
   except:
     - dev
@@ -59,11 +64,13 @@ deploy-to-testing:
   stage: build
   variables:
     GENERATE_SOURCEMAP: true
+    VITE_APP_BASE: /apps/assistant
+    VITE_GLOB_API_URL: /ma/api
   script:
-    - CI=false npm run build
+    - pnpm run build
     - ssh ${DEPLOY_USER:-sa}@${DEVELOP_HOST:-moon} "test -d /var/www/apps/${NAME}-${DEV_BRANCH} || mkdir /var/www/apps/${NAME}-${DEV_BRANCH}"
-    - rsync -vrlptC --delete --exclude='.DS_*' build/* "${DEVELOP_HOST}:/var/www/apps/${NAME}-${DEV_BRANCH}/"
-    - node scripts/notify_wx.js ${DEVELOP_HOST} ${NAME}-${DEV_BRANCH}-testing
+    - rsync -vrlptC --delete --exclude='.DS_*' dist/* "${DEVELOP_HOST}:/var/www/apps/${NAME}-${DEV_BRANCH}/"
+    # - node scripts/notify_wx.js ${DEVELOP_HOST} ${NAME}-${DEV_BRANCH}-testing
   only:
     - dev@cupola/apps/assistant
     - main@cupola/apps/assistant

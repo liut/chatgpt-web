@@ -58,6 +58,7 @@ export function fetchChatStream(
     prompt: string
     csid?: string
     options?: { conversationId?: string; parentMessageId?: string }
+    regen?: boolean
     onAbort?: (event: Event) => void
     onError?: (event: Event) => void
     onMessage: (msg: StreamMessage) => void
@@ -68,6 +69,7 @@ export function fetchChatStream(
   // 初始化参数
   const {
     prompt,
+    regen,
     onMessage,
     onError,
     onAbort,
@@ -94,6 +96,7 @@ export function fetchChatStream(
         csid,
         prompt,
         options: params.options,
+        regen,
         systemMessage: settingStore.systemMessage,
         temperature: settingStore.temperature,
         top_p: settingStore.top_p,
