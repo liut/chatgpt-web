@@ -5,5 +5,7 @@ interface ImportMetaEnv {
 	readonly VITE_APP_API_BASE_URL: string;
 	readonly VITE_GLOB_OPEN_LONG_REPLY: string;
 	readonly VITE_GLOB_APP_PWA: string;
+	readonly VITE_BASE_PATH: string;
 	readonly VITE_TOKEN_NAME: string;
+	readonly VITE_AUTH_HEADER: string;
 }

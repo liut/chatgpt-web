@@ -19,6 +19,7 @@ variables:
   SKIP_PREFLIGHT_CHECK: 'true'
   VITE_GLOB_API_URL: /api
   VITE_TOKEN_NAME: oceans-token
+  VITE_AUTH_HEADER: token
 
 before_script:
   - export DATE=$(date '+%Y%m%d')
@@ -48,7 +49,7 @@ deploy-to-self-branch:
     GENERATE_SOURCEMAP: true
     VITE_GLOB_API_URL: /ma/api
   script:
-    - export VITE_APP_BASE=/apps/${NAME}-${DEV_BRANCH}
+    - export VITE_BASE_PATH=/apps/${NAME}-${DEV_BRANCH}
     - pnpm run build
     - ssh ${DEPLOY_USER:-sa}@${DEVELOP_HOST:-moon} "test -d /var/www/apps/${NAME}-${DEV_BRANCH} || mkdir -p /var/www/apps/${NAME}-${DEV_BRANCH}"
     - rsync -vrlptC --delete --exclude='.DS_*' dist/* "${DEVELOP_HOST}:/var/www/apps/${NAME}-${DEV_BRANCH}"
@@ -64,7 +65,7 @@ deploy-to-testing:
   stage: build
   variables:
     GENERATE_SOURCEMAP: true
-    VITE_APP_BASE: /apps/assistant
+    VITE_BASE_PATH: /apps/assistant
     VITE_GLOB_API_URL: /ma/api
   script:
     - pnpm run build

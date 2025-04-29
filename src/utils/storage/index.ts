@@ -9,9 +9,14 @@ export function createLocalStorage(options?: { expire?: number | null }) {
   const { expire } = Object.assign({ expire: DEFAULT_CACHE_TIME }, options)
 
   function set<T = any>(key: string, data: T) {
+    if (typeof data === 'string') {
+      window.localStorage.setItem(key, data)
+      return
+    }
+
     const storageData: StorageData<T> = {
       data,
-      expire: expire !== null ? new Date().getTime() + expire * 1000 : null,
+      expire: expire !== null ? Date.now() + expire * 1000 : null,
     }
 
     const json = JSON.stringify(storageData)
@@ -20,13 +25,14 @@ export function createLocalStorage(options?: { expire?: number | null }) {
 
   function get(key: string) {
     const json = window.localStorage.getItem(key)
-    if (json) {
+    if (json?.startsWith('{')) {
       let storageData: StorageData | null = null
 
       try {
         storageData = JSON.parse(json)
       }
-      catch {
+      catch (e){
+        console.warn('Failed to parse JSON:', e)
         // Prevent failure
       }
 
@@ -39,6 +45,7 @@ export function createLocalStorage(options?: { expire?: number | null }) {
       remove(key)
       return null
     }
+    return json
   }
 
   function remove(key: string) {
