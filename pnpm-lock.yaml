@@ -35,6 +35,9 @@ importers:
       pinia:
         specifier: ^2.0.33
         version: 2.0.33(typescript@4.9.5)(vue@3.2.47)
+      sse.js:
+        specifier: ^0.6.1
+        version: 0.6.1
       vue:
         specifier: ^3.2.47
         version: 3.2.47
@@ -298,11 +301,6 @@ packages:
 
   '@babel/parser@7.21.2':
     resolution: {integrity: sha512-URpaIJQwEkEC2T9Kn+Ai6Xe/02iNaVCuT/PtoRz3GPVJVDpPd7mLo+VddTbhCRU9TXqW5mSrQfXZyi8kDKOVpQ==}
-    engines: {node: '>=6.0.0'}
-    hasBin: true
-
-  '@babel/parser@7.23.5':
-    resolution: {integrity: sha512-hOOqoiNXrmGdFbhgCzu6GiURxUgM27Xwd/aPuu8RfHEZPBzL1Z54okAHAQjXfcQNwvrlkAmAp4SlRTZ45vlthQ==}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -3883,6 +3881,9 @@ packages:
   split2@3.2.2:
     resolution: {integrity: sha512-9NThjpgZnifTkJpzTZ7Eue85S49QwpNhZTq6GRJwObb6jnLFNGB7Qm73V5HewTROPyxD0C29xqmaI68bQtV+hg==}
 
+  sse.js@0.6.1:
+    resolution: {integrity: sha512-peXG6GnWqF5hnubhMw0WfB6rqQy7z7LaMBT067vqgQwC3gKz8JGFzexBSV80FqZ9JoUDwo3Xt5nxkrGrgbPrtA==}
+
   string-argv@0.3.1:
     resolution: {integrity: sha512-a1uQGz7IyVy9YwhqjZIZu1c8JO8dNIe20xBmSS6qu9kv++k3JGzCVmprbNN5Kn+BgzD5E7YYwg1CcjuJMRNsvg==}
     engines: {node: '>=0.6.19'}
@@ -4545,7 +4546,7 @@ snapshots:
       '@babel/helper-compilation-targets': 7.22.15
       '@babel/helper-module-transforms': 7.23.3(@babel/core@7.23.5)
       '@babel/helpers': 7.23.5
-      '@babel/parser': 7.23.5
+      '@babel/parser': 7.24.7
       '@babel/template': 7.22.15
       '@babel/traverse': 7.23.5
       '@babel/types': 7.23.5
@@ -4708,10 +4709,6 @@ snapshots:
   '@babel/parser@7.21.2':
     dependencies:
       '@babel/types': 7.21.2
-
-  '@babel/parser@7.23.5':
-    dependencies:
-      '@babel/types': 7.23.5
 
   '@babel/parser@7.24.7':
     dependencies:
@@ -5224,7 +5221,7 @@ snapshots:
   '@babel/template@7.22.15':
     dependencies:
       '@babel/code-frame': 7.23.5
-      '@babel/parser': 7.23.5
+      '@babel/parser': 7.24.7
       '@babel/types': 7.23.5
 
   '@babel/traverse@7.23.5':
@@ -5235,7 +5232,7 @@ snapshots:
       '@babel/helper-function-name': 7.23.0
       '@babel/helper-hoist-variables': 7.22.5
       '@babel/helper-split-export-declaration': 7.22.6
-      '@babel/parser': 7.23.5
+      '@babel/parser': 7.24.7
       '@babel/types': 7.23.5
       debug: 4.3.4
       globals: 11.12.0
@@ -8729,6 +8726,8 @@ snapshots:
   split2@3.2.2:
     dependencies:
       readable-stream: 3.6.1
+
+  sse.js@0.6.1: {}
 
   string-argv@0.3.1: {}
 

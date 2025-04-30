@@ -8,21 +8,21 @@ const service = axios.create({
 })
 
 service.interceptors.request.use(
-	(config) => {
-		const token = useAuthStore().token;
-		if (token) {
-			if (authHeader === 'Authorization') {
-				config.headers.Authorization = `Bearer ${token}`;
-			} else config.headers[authHeader] = token;
-			console.info(config.headers, token);
-		}
-		return config;
-	},
-	(error) => {
-		console.info("Request error:", error);
-		return Promise.reject(error.response);
-	},
-);
+  (config) => {
+    const token = useAuthStore().token
+    if (token) {
+      if (authHeader === 'Authorization')
+        config.headers.Authorization = `Bearer ${token}`
+      else config.headers[authHeader] = token
+      // console.info(config.headers, token)
+    }
+    return config
+  },
+  (error) => {
+    // console.info('Request error:', error)
+    return Promise.reject(error.response)
+  },
+)
 
 service.interceptors.response.use(
   (response: AxiosResponse): AxiosResponse => {
@@ -32,7 +32,7 @@ service.interceptors.response.use(
     throw new Error(response.status.toString())
   },
   (error) => {
-    console.info('Response error:', error)
+    // console.info('Response error:', error)
     return Promise.reject(error)
   },
 )

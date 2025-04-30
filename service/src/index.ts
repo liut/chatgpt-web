@@ -123,7 +123,7 @@ router.post('/config', auth, async (req, res) => {
   }
 })
 
-router.post('/session', async (req, res) => {
+router.get('/session', async (req, res) => {
   try {
     const user = req.cookies[cookieName]
     const AUTH_SECRET_KEY = process.env.AUTH_SECRET_KEY

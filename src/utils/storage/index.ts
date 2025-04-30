@@ -31,7 +31,7 @@ export function createLocalStorage(options?: { expire?: number | null }) {
       try {
         storageData = JSON.parse(json)
       }
-      catch (e){
+      catch (e) {
         console.warn('Failed to parse JSON:', e)
         // Prevent failure
       }

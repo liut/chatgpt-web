@@ -3,7 +3,7 @@ import { ss } from '@/utils/storage'
 const SECRET_TOKEN = 'SECRET_TOKEN'
 const LOCAL_NAME = import.meta.env.VITE_TOKEN_NAME || SECRET_TOKEN
 
-export function getToken() : string | undefined {
+export function getToken(): string | undefined {
   return ss.get(LOCAL_NAME)
 }
 
