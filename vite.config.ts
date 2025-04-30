@@ -23,6 +23,7 @@ function setupPlugins(env: ImportMetaEnv): PluginOption[] {
 
 export default defineConfig((env) => {
   const viteEnv = loadEnv(env.mode, process.cwd()) as unknown as ImportMetaEnv
+  const apiProxyTo = viteEnv.VITE_API_PROXY_TO || 'http://127.0.0.1:3002'
 
   return {
     base: viteEnv.VITE_BASE_PATH || '',
@@ -38,11 +39,11 @@ export default defineConfig((env) => {
       open: false,
       proxy: {
         '/auth': {
-          target: viteEnv.VITE_API_PROXY_TO,
+          target: apiProxyTo,
           changeOrigin: true, // 允许跨域
         },
         '/api': {
-          target: viteEnv.VITE_API_PROXY_TO,
+          target: apiProxyTo,
           changeOrigin: true, // 允许跨域
           // rewrite: path => path.replace('/api/', '/'),
         },

@@ -4,7 +4,7 @@ import { useAuthStore } from '@/store'
 const authHeader = import.meta.env.VITE_AUTH_HEADER || 'Authorization'
 
 const service = axios.create({
-  baseURL: import.meta.env.VITE_API_PATH,
+  baseURL: import.meta.env.VITE_API_PATH || '/api',
 })
 
 service.interceptors.request.use(
