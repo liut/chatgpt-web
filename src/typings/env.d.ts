@@ -1,10 +1,10 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-	readonly VITE_GLOB_API_URL: string;
-	readonly VITE_APP_API_BASE_URL: string;
-	readonly VITE_GLOB_OPEN_LONG_REPLY: string;
-	readonly VITE_GLOB_APP_PWA: string;
+	readonly VITE_API_PATH: string;
+	readonly VITE_API_PROXY_TO: string;
+	readonly VITE_OPEN_LONG_REPLY: string;
+	readonly VITE_PWA_ENABLE: string;
 	readonly VITE_BASE_PATH: string;
 	readonly VITE_TOKEN_NAME: string;
 	readonly VITE_AUTH_HEADER: string;

@@ -304,7 +304,7 @@ PS: It is also okay to run `pnpm start` directly on the server without packing
 
 #### Frontend Webpage
 
-1. Modify the `VITE_GLOB_API_URL` field in the `.env` file at the root directory to your actual backend interface address
+1. Modify the `VITE_API_PATH` field in the `.env` file at the root directory to your actual backend interface address
 
 2. Run the following commands at the root directory, then copy the files in the `dist` folder to the root directory of your website service
 
@@ -321,7 +321,7 @@ A: Because there is a commit message verification, please follow the [Commit Gui
 
 Q: Where to change the request interface if only the front-end page is used?
 
-A: The `VITE_GLOB_API_URL` field in the `.env` file at the root directory.
+A: The `VITE_API_PATH` field in the `.env` file at the root directory.
 
 Q: All files explode red when saving?
 

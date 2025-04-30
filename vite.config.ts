@@ -7,7 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 function setupPlugins(env: ImportMetaEnv): PluginOption[] {
   return [
     vue(),
-    env.VITE_GLOB_APP_PWA === 'true' && VitePWA({
+    env.VITE_PWA_ENABLE === 'true' && VitePWA({
       injectRegister: 'auto',
       manifest: {
         name: 'chatGPT',
@@ -38,11 +38,11 @@ export default defineConfig((env) => {
       open: false,
       proxy: {
         '/auth': {
-          target: viteEnv.VITE_APP_API_BASE_URL,
+          target: viteEnv.VITE_API_PROXY_TO,
           changeOrigin: true, // 允许跨域
         },
         '/api': {
-          target: viteEnv.VITE_APP_API_BASE_URL,
+          target: viteEnv.VITE_API_PROXY_TO,
           changeOrigin: true, // 允许跨域
           // rewrite: path => path.replace('/api/', '/'),
         },
