@@ -304,7 +304,7 @@ PS: It is also okay to run `pnpm start` directly on the server without packing
 
 #### Frontend Webpage
 
-1. Modify the `VITE_API_PATH` field in the `.env` file at the root directory to your actual backend interface address
+1. Modify the `VITE_API_PATH` field in the `.env` file at the root directory to your actual path of backend API
 
 2. Run the following commands at the root directory, then copy the files in the `dist` folder to the root directory of your website service
 
